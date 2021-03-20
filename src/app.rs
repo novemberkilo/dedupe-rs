@@ -39,18 +39,22 @@ pub fn lookup_by_size_prime(
     Ok(())
 }
 
-// one possible implementation of walking a directory only visiting files
-//fn visit_dirs(dir: &Path, cb: &dyn Fn(&DirEntry)) -> io::Result<()> {
-//    if dir.is_dir() {
-//        for entry in fs::read_dir(dir)? {
-//            let entry = entry?;
-//            let path = entry.path();
-//            if path.is_dir() {
-//                visit_dirs(&path, cb)?;
-//            } else {
-//                cb(&entry);
-//            }
-//        }
-//    }
-//    Ok(())
-//}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    #[test]
+    fn test_lookup_by_size_prime() {
+        let size_map = &mut HashMap::<u64, Vec<FileData>>::new();
+        let store = "fixtures/mangled";
+        let store_path = Path::new(&store);
+
+        lookup_by_size_prime(store_path, size_map).unwrap();
+        assert!(size_map.contains_key(&7));
+        let (_k, res) = size_map.get_key_value(&7).unwrap();
+        let mut files: Vec<_> = res.iter().map(|v| v.path.to_string_lossy()).collect();
+        files.sort();
+        assert!(files == vec!["fixtures/mangled/hello", "fixtures/mangled/world"])
+    }
+}
