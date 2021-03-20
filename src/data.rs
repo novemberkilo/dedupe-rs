@@ -10,10 +10,8 @@ pub enum Error {
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Error::ErrorMessage(e) =>
-                write!(f, "Error: {}", e),
-            Error::IOError(e) =>
-                write!(f, "IO Error: {}", e), 
+            Error::ErrorMessage(e) => write!(f, "Error: {}", e),
+            Error::IOError(e) => write!(f, "IO Error: {}", e),
         }
     }
 }
@@ -27,4 +25,4 @@ impl From<std::io::Error> for Error {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FileData {
     pub path: std::path::PathBuf,
-} 
+}
