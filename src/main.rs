@@ -1,9 +1,9 @@
-use structopt::StructOpt;
 use dedupe::app::lookup_by_size;
+use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 struct Cli {
-    store: String
+    store: String,
 }
 
 fn main() {
