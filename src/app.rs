@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
+extern crate sha1;
+
 use crate::data::{Error, FileData};
 
 pub fn lookup_by_size(store: String) -> Result<Vec<Vec<FileData>>, Error> {
@@ -39,6 +41,28 @@ pub fn lookup_by_size_prime(
     Ok(())
 }
 
+pub fn lookup_by_hash(
+    duplicates_by_size: &Vec<Vec<FileData>>
+) -> Result<Vec<Vec<FileData>>, Error> {
+    let mut duplicates: Vec<Vec<FileData>> = vec![];
+
+    for possible_duplicates in duplicates_by_size.iter() {
+        let sha_map = &mut HashMap::<String, Vec<FileData>>::new();
+
+        for candidate in possible_duplicates.iter() {
+            let buffer: Vec<u8> = fs::read(candidate.path.clone())?;
+            let sha1 = sha1::Sha1::from(buffer).digest().to_string();
+            let e = sha_map.entry(sha1).or_insert(vec![]);
+            e.push(candidate.clone());
+        }
+        sha_map.retain(|_sha1, candidates| candidates.len() > 1);
+        for val in sha_map.values() {
+            duplicates.push(val.clone())
+        }
+    }
+    Ok(duplicates)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -56,5 +80,28 @@ mod tests {
         let mut files: Vec<_> = res.iter().map(|v| v.path.to_string_lossy()).collect();
         files.sort();
         assert!(files == vec!["fixtures/mangled/hello", "fixtures/mangled/world"])
+    }
+
+    #[test]
+    fn test_lookup_by_size() {
+        let store = "fixtures/mangled".to_string();
+        let results = lookup_by_size(store).unwrap();
+        let hello_world = vec![
+            FileData {
+                path: Path::new("fixtures/mangled/world").to_path_buf(),
+            },
+            FileData {
+                path: Path::new("fixtures/mangled/hello").to_path_buf(),
+            },
+        ];
+        assert!(results.contains(&hello_world))
+    }
+
+    #[test]
+    fn test_lookup_by_hash() {
+        let store = "fixtures/mangled".to_string();
+        let results = lookup_by_size(store).unwrap();
+        let better_results = lookup_by_hash(&results).unwrap();
+        assert!(better_results.len() == 3)
     }
 }
