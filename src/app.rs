@@ -88,13 +88,21 @@ mod tests {
         let results = lookup_by_size(store).unwrap();
         let hello_world = vec![
             FileData {
+                path: Path::new("fixtures/mangled/hello").to_path_buf(),
+            },
+            FileData {
+                path: Path::new("fixtures/mangled/world").to_path_buf(),
+            },
+        ];
+        let world_hello = vec![
+            FileData {
                 path: Path::new("fixtures/mangled/world").to_path_buf(),
             },
             FileData {
                 path: Path::new("fixtures/mangled/hello").to_path_buf(),
             },
         ];
-        assert!(results.contains(&hello_world))
+        assert!(results.contains(&hello_world) || results.contains(&world_hello))
     }
 
     #[test]
