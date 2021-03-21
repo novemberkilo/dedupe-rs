@@ -5,6 +5,8 @@ A command-line tool for finding files that are copies of each other.
 
 ## Usage
 
+Assuming built via rust toolchain (e.g. `cargo build --release`)
+
 ```
 # output in human readable format, duplicates detected under a given directory
 
